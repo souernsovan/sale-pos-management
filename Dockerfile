@@ -10,7 +10,7 @@ COPY vite.config.js tailwind.config.js postcss.config.js ./
 RUN npm run build
 
 # ---- PHP application ----
-FROM php:8.3-apache AS app
+FROM php:8.4-apache AS app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpng-dev libjpeg62-turbo-dev libfreetype6-dev libzip-dev libonig-dev libpq-dev unzip git \
