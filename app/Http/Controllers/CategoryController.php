@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -51,6 +52,8 @@ class CategoryController extends Controller
     public function destroy(Request $request, Category $category)
     {
         abort_unless($request->user()->can('delete categories'), 403);
+
+        Audit::log('categories', "Deleted category \"{$category->name}\"", $category, event: 'deleted');
 
         $category->delete();
 

@@ -5,7 +5,9 @@ namespace App\Livewire\Pos;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Setting;
 use App\Models\StockMovement;
+use App\Services\Khqr\KhqrCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -176,6 +178,29 @@ class Terminal extends Component
         return max(0, $this->subtotal - $this->discount);
     }
 
+    #[Computed]
+    public function khqrSvg(): ?string
+    {
+        if ($this->paymentMethod !== 'bank_transfer' || $this->total <= 0) {
+            return null;
+        }
+
+        $accountId = Setting::get('bakong_account_id');
+
+        if (! $accountId) {
+            return null;
+        }
+
+        $payload = KhqrCode::generateIndividual(
+            bakongAccountId: $accountId,
+            accountName: Setting::get('bakong_account_name', Setting::get('shop_name', config('app.name'))),
+            merchantCity: Setting::get('bakong_merchant_city', 'Phnom Penh'),
+            amount: $this->total,
+        );
+
+        return app('DNS2D')->getBarcodeSVG($payload, 'QRCODE', 4, 4);
+    }
+
     public function checkout()
     {
         abort_unless(auth()->user()->can('access pos'), 403);
@@ -234,6 +259,7 @@ class Terminal extends Component
 
                 $product->decrement('stock_qty', $line['quantity']);
                 $product->stockMovements()->create([
+                    'sale_id' => $sale->id,
                     'type' => StockMovement::TYPE_SALE,
                     'quantity' => -$line['quantity'],
                     'note' => "Sale #{$sale->id}",

@@ -82,8 +82,43 @@ class ProductManagementTest extends TestCase
         $this->actingAs($user)->post(route('products.stock-movements.store', $product), [
             'type' => 'damage',
             'quantity' => 5,
+            'note' => 'Broken in transit',
         ])->assertSessionHasErrors('quantity');
 
         $this->assertSame(2, $product->fresh()->stock_qty);
+    }
+
+    public function test_a_reason_is_required_for_adjustment_and_damage_but_not_restock(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::create([
+            'name' => 'Crackers', 'sku' => 'SKU-004', 'price' => 1.5, 'cost' => 0.8, 'stock_qty' => 10,
+        ]);
+
+        $this->actingAs($user)->post(route('products.stock-movements.store', $product), [
+            'type' => 'damage', 'quantity' => 1,
+        ])->assertSessionHasErrors('note');
+
+        $this->actingAs($user)->post(route('products.stock-movements.store', $product), [
+            'type' => 'adjustment', 'quantity' => 1,
+        ])->assertSessionHasErrors('note');
+
+        $this->actingAs($user)->post(route('products.stock-movements.store', $product), [
+            'type' => 'restock', 'quantity' => 1,
+        ])->assertSessionDoesntHaveErrors('note');
+    }
+
+    public function test_a_products_own_reorder_point_overrides_the_global_low_stock_threshold(): void
+    {
+        $lowGlobalThreshold = Product::create([
+            'name' => 'Soap', 'sku' => 'SKU-600', 'price' => 1, 'cost' => 0.5, 'stock_qty' => 8,
+        ]);
+        $this->assertFalse($lowGlobalThreshold->isLowStock(5));
+
+        $customReorderPoint = Product::create([
+            'name' => 'Shampoo', 'sku' => 'SKU-601', 'price' => 1, 'cost' => 0.5, 'stock_qty' => 8,
+            'reorder_point' => 10,
+        ]);
+        $this->assertTrue($customReorderPoint->isLowStock(5));
     }
 }

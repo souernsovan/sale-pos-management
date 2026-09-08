@@ -65,7 +65,7 @@
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Get a quick overview of sales performance, popular products, and stock levels.') }}</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="bg-white shadow-sm rounded-lg p-6 dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __("Today's Sales") }}</p>
                     <p class="mt-1 text-3xl font-semibold text-gray-900 dark:text-gray-100">{{ number_format($todaySales, 2) }}</p>
@@ -73,6 +73,10 @@
                 <div class="bg-white shadow-sm rounded-lg p-6 dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __("This Month's Sales") }}</p>
                     <p class="mt-1 text-3xl font-semibold text-gray-900 dark:text-gray-100">{{ number_format($monthSales, 2) }}</p>
+                </div>
+                <div class="bg-white shadow-sm rounded-lg p-6 dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Low Stock Items') }}</p>
+                    <p @class(['mt-1 text-3xl font-semibold', 'text-red-600 dark:text-red-400' => $lowStockCount > 0, 'text-gray-900 dark:text-gray-100' => $lowStockCount === 0])>{{ $lowStockCount }}</p>
                 </div>
             </div>
 

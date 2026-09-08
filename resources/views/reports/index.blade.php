@@ -98,6 +98,16 @@
                             <tr><td colspan="5" class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-center">{{ __('No sales in this range.') }}</td></tr>
                         @endforelse
                     </tbody>
+                    @if ($profitReport->isNotEmpty())
+                        <tfoot>
+                            <tr class="bg-gray-50 dark:bg-gray-800">
+                                <td colspan="2" class="px-6 py-3 text-right text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Total') }}</td>
+                                <td class="px-6 py-3 text-sm text-right font-semibold text-gray-900 dark:text-gray-100">{{ number_format($profitReport->sum('revenue'), 2) }}</td>
+                                <td class="px-6 py-3 text-sm text-right font-semibold text-gray-900 dark:text-gray-100">{{ number_format($profitReport->sum('cost'), 2) }}</td>
+                                <td class="px-6 py-3 text-sm text-right font-semibold text-green-700 dark:text-green-400">{{ number_format($profitReport->sum('profit'), 2) }}</td>
+                            </tr>
+                        </tfoot>
+                    @endif
                 </table>
             </div>
 

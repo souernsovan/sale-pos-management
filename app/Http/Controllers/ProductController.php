@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\StockMovement;
+use App\Models\Supplier;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -16,6 +18,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
+        $lowStockThreshold = (int) Setting::get('low_stock_threshold', '5');
+
         $products = Product::query()
             ->with('category')
             ->when($request->filled('search'), fn ($q) => $q->where(function ($q) use ($request) {
@@ -24,12 +28,12 @@ class ProductController extends Controller
                     ->orWhere('barcode', 'like', "%{$request->search}%");
             }))
             ->when($request->filled('category_id'), fn ($q) => $q->where('category_id', $request->category_id))
+            ->when($request->boolean('low_stock'), fn ($q) => $q->lowStock($lowStockThreshold))
             ->orderBy('name')
             ->paginate(15)
             ->withQueryString();
 
         $categories = Category::orderBy('name')->get();
-        $lowStockThreshold = (int) Setting::get('low_stock_threshold', '5');
 
         return view('products.index', compact('products', 'categories', 'lowStockThreshold'));
     }
@@ -39,8 +43,9 @@ class ProductController extends Controller
         abort_unless($request->user()->can('create products'), 403);
 
         $categories = Category::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
 
-        return view('products.create', compact('categories'));
+        return view('products.create', compact('categories', 'suppliers'));
     }
 
     public function store(StoreProductRequest $request)
@@ -77,12 +82,21 @@ class ProductController extends Controller
         return redirect()->route('products.show', $product)->with('status', 'Product created.');
     }
 
-    public function show(Product $product)
+    public function show(Request $request, Product $product)
     {
-        $product->load(['category', 'stockMovements.creator']);
+        $product->load(['category', 'supplier']);
+
+        $movements = $product->stockMovements()
+            ->with('creator')
+            ->when($request->filled('movement_type'), fn ($q) => $q->where('type', $request->movement_type))
+            ->when($request->filled('date_from'), fn ($q) => $q->whereDate('created_at', '>=', $request->date_from))
+            ->when($request->filled('date_to'), fn ($q) => $q->whereDate('created_at', '<=', $request->date_to))
+            ->paginate(15, pageName: 'movements_page')
+            ->withQueryString();
+
         $lowStockThreshold = (int) Setting::get('low_stock_threshold', '5');
 
-        return view('products.show', compact('product', 'lowStockThreshold'));
+        return view('products.show', compact('product', 'lowStockThreshold', 'movements'));
     }
 
     public function edit(Request $request, Product $product)
@@ -90,8 +104,9 @@ class ProductController extends Controller
         abort_unless($request->user()->can('edit products'), 403);
 
         $categories = Category::orderBy('name')->get();
+        $suppliers = Supplier::orderBy('name')->get();
 
-        return view('products.edit', compact('product', 'categories'));
+        return view('products.edit', compact('product', 'categories', 'suppliers'));
     }
 
     public function update(UpdateProductRequest $request, Product $product)
@@ -115,6 +130,8 @@ class ProductController extends Controller
     public function destroy(Request $request, Product $product)
     {
         abort_unless($request->user()->can('delete products'), 403);
+
+        Audit::log('products', "Deleted product \"{$product->name}\" (SKU {$product->sku})", $product, event: 'deleted');
 
         if ($product->image) {
             Storage::disk('public')->delete($product->image);

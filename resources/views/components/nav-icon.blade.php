@@ -50,5 +50,31 @@
         @case('logout')
             <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
             @break
+
+        @case('suppliers')
+            <rect x="2.5" y="7" width="11" height="8" rx="1" />
+            <path d="M13.5 10h3.5l3 3v2h-2" />
+            <circle cx="7" cy="18" r="1.5" />
+            <circle cx="16.5" cy="18" r="1.5" />
+            @break
+
+        @case('purchases')
+            <path d="M4 8l3-4h10l3 4" />
+            <path d="M4 8v10a1 1 0 001 1h14a1 1 0 001-1V8" />
+            <path d="M4 8h5a3 3 0 006 0h5" />
+            @break
+
+        @case('users')
+            <circle cx="9" cy="7.5" r="3" />
+            <path d="M3.5 19c.4-3.2 2.8-5.5 5.5-5.5s5.1 2.3 5.5 5.5" />
+            <path d="M15.5 8a2.5 2.5 0 010 5" />
+            <path d="M18.5 19c-.2-2-1.3-3.7-2.8-4.6" />
+            @break
+
+        @case('audit')
+            <path d="M6 3.5h9l3.5 3.5v13a1 1 0 01-1 1H6a1 1 0 01-1-1v-15a1 1 0 011-1z" />
+            <path d="M14.5 3.5V7a1 1 0 001 1H19" />
+            <path d="M8 13.5l2.5 2.5L16 10.5" />
+            @break
     @endswitch
 </svg>

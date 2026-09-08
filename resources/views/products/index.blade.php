@@ -30,8 +30,12 @@
                         @endforeach
                     </select>
                 </div>
+                <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 pb-2">
+                    <input type="checkbox" name="low_stock" value="1" @checked(request()->boolean('low_stock')) class="rounded border-gray-300 dark:border-gray-700 text-indigo-600 focus:ring-indigo-500">
+                    {{ __('Low stock only') }}
+                </label>
                 <x-primary-button>{{ __('Filter') }}</x-primary-button>
-                @if (request('search') || request('category_id'))
+                @if (request('search') || request('category_id') || request()->boolean('low_stock'))
                     <a href="{{ route('products.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">{{ __('Reset') }}</a>
                 @endif
             </form>

@@ -43,6 +43,7 @@ class SaleController extends Controller
             foreach ($sale->items as $item) {
                 $item->product?->increment('stock_qty', $item->quantity);
                 $item->product?->stockMovements()->create([
+                    'sale_id' => $sale->id,
                     'type' => StockMovement::TYPE_VOID,
                     'quantity' => $item->quantity,
                     'note' => "Void of sale #{$sale->id}",

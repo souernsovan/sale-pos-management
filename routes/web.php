@@ -1,15 +1,19 @@
 <?php
 
+use App\Http\Controllers\AuditController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +24,8 @@ Route::get('/health', function () {
 Route::get('/', function () {
     return redirect()->route(auth()->check() ? 'dashboard' : 'login');
 });
+
+Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -32,6 +38,19 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:view categories')->group(function () {
         Route::resource('categories', CategoryController::class)->except(['show']);
+    });
+
+    Route::middleware('permission:view suppliers')->group(function () {
+        Route::resource('suppliers', SupplierController::class)->except(['show']);
+    });
+
+    Route::middleware('permission:create purchases')->group(function () {
+        Route::get('purchases/create', [PurchaseController::class, 'create'])->name('purchases.create');
+        Route::post('purchases', [PurchaseController::class, 'store'])->name('purchases.store');
+    });
+    Route::middleware('permission:view purchases')->group(function () {
+        Route::get('purchases', [PurchaseController::class, 'index'])->name('purchases.index');
+        Route::get('purchases/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
     });
 
     Route::middleware('permission:view products')->group(function () {
@@ -76,12 +95,13 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('permission:view users')->group(function () {
-        Route::get('settings/users/create', [UserController::class, 'create'])->name('settings.users.create');
-        Route::post('settings/users', [UserController::class, 'store'])->name('settings.users.store');
-        Route::get('settings/users/{user}/edit', [UserController::class, 'edit'])->name('settings.users.edit');
-        Route::put('settings/users/{user}', [UserController::class, 'update'])->name('settings.users.update');
-        Route::post('settings/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('settings.users.toggle-active');
-        Route::delete('settings/users/{user}', [UserController::class, 'destroy'])->name('settings.users.destroy');
+        Route::get('users', [UserController::class, 'index'])->name('users.index');
+        Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('users', [UserController::class, 'store'])->name('users.store');
+        Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::post('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+        Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 
     Route::middleware('permission:view roles')->group(function () {
@@ -94,6 +114,10 @@ Route::middleware('auth')->group(function () {
         Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
         Route::post('roles/{role}/reset-default', [RoleController::class, 'resetDefault'])->name('roles.reset-default');
         Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    });
+
+    Route::middleware('permission:view audit log')->group(function () {
+        Route::get('audit', [AuditController::class, 'index'])->name('audit.index');
     });
 });
 

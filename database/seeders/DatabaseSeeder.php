@@ -25,5 +25,6 @@ class DatabaseSeeder extends Seeder
         ])->syncRoles(['Super Admin']);
 
         $this->call(AdminSeeder::class);
+        $this->call(DemoDataSeeder::class);
     }
 }

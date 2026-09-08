@@ -19,10 +19,14 @@
                         <dd class="text-gray-900 dark:text-gray-100">{{ $product->sku }}</dd>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('Category') }}</dt>
                         <dd class="text-gray-900 dark:text-gray-100">{{ $product->category?->name ?? '—' }}</dd>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Supplier') }}</dt>
+                        <dd class="text-gray-900 dark:text-gray-100">{{ $product->supplier?->name ?? '—' }}</dd>
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('Price') }}</dt>
                         <dd class="text-gray-900 dark:text-gray-100">{{ number_format($product->price, 2) }}</dd>
-                        <dt class="text-gray-500 dark:text-gray-400">{{ __('Cost') }}</dt>
-                        <dd class="text-gray-900 dark:text-gray-100">{{ number_format($product->cost, 2) }}</dd>
+                        @can('manage products')
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Cost') }}</dt>
+                            <dd class="text-gray-900 dark:text-gray-100">{{ number_format($product->cost, 2) }}</dd>
+                        @endcan
                         <dt class="text-gray-500 dark:text-gray-400">{{ __('Stock on hand') }}</dt>
                         <dd @class(['font-semibold', 'text-red-600 dark:text-red-400' => $product->isLowStock($lowStockThreshold), 'text-green-700 dark:text-green-400' => ! $product->isLowStock($lowStockThreshold)])>{{ $product->stock_qty }}</dd>
                     </dl>
@@ -67,6 +71,31 @@
 
             <div class="bg-white overflow-hidden shadow-sm rounded-lg dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">
                 <h3 class="font-semibold text-gray-800 dark:text-gray-200 px-6 pt-6">{{ __('Stock Movement History') }}</h3>
+
+                <form method="GET" action="{{ route('products.show', $product) }}" class="flex flex-wrap items-end gap-3 px-6 pt-4">
+                    <div>
+                        <x-input-label for="movement_type" :value="__('Type')" />
+                        <select id="movement_type" name="movement_type" class="mt-1 block border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:bg-gray-900 dark:text-gray-100">
+                            <option value="">{{ __('All') }}</option>
+                            @foreach (['restock', 'purchase', 'sale', 'void', 'adjustment', 'damage'] as $type)
+                                <option value="{{ $type }}" @selected(request('movement_type') === $type)>{{ ucfirst($type) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <x-input-label for="date_from" :value="__('From')" />
+                        <x-text-input id="date_from" name="date_from" type="date" class="mt-1 block" :value="request('date_from')" />
+                    </div>
+                    <div>
+                        <x-input-label for="date_to" :value="__('To')" />
+                        <x-text-input id="date_to" name="date_to" type="date" class="mt-1 block" :value="request('date_to')" />
+                    </div>
+                    <x-primary-button>{{ __('Filter') }}</x-primary-button>
+                    @if (request()->anyFilled(['movement_type', 'date_from', 'date_to']))
+                        <a href="{{ route('products.show', $product) }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">{{ __('Reset') }}</a>
+                    @endif
+                </form>
+
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 mt-4">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
@@ -78,10 +107,17 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-                        @forelse ($product->stockMovements as $movement)
+                        @forelse ($movements as $movement)
                             <tr>
                                 <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $movement->created_at->format('Y-m-d H:i') }}</td>
-                                <td class="px-6 py-3 text-sm text-gray-900 dark:text-gray-100 capitalize">{{ $movement->type }}</td>
+                                <td class="px-6 py-3 text-sm">
+                                    <span @class([
+                                        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize',
+                                        'bg-green-100 text-green-800 dark:bg-green-500/10 dark:text-green-400' => $movement->direction() === 'in',
+                                        'bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-400' => $movement->direction() === 'out',
+                                        'bg-amber-100 text-amber-800 dark:bg-amber-500/10 dark:text-amber-400' => $movement->direction() === 'adjustment',
+                                    ])>{{ $movement->type }}</span>
+                                </td>
                                 <td @class(['px-6 py-3 text-sm text-right', 'text-green-700 dark:text-green-400' => $movement->quantity > 0, 'text-red-700 dark:text-red-400' => $movement->quantity < 0])>{{ $movement->quantity > 0 ? '+' : '' }}{{ $movement->quantity }}</td>
                                 <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $movement->note ?? '—' }}</td>
                                 <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $movement->creator?->name ?? '—' }}</td>
@@ -93,6 +129,8 @@
                         @endforelse
                     </tbody>
                 </table>
+
+                <div class="px-6 py-4">{{ $movements->links() }}</div>
             </div>
         </div>
     </div>

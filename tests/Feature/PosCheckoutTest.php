@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\Pos\Terminal;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -120,5 +121,28 @@ class PosCheckoutTest extends TestCase
 
         $this->assertSame(10, $product->fresh()->stock_qty);
         $this->assertSame('voided', $sale->fresh()->status);
+    }
+
+    public function test_khqr_code_appears_for_bank_transfer_once_a_bakong_account_is_configured(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::create([
+            'name' => 'Water', 'sku' => 'SKU-105', 'barcode' => 'BC-105',
+            'price' => 1.00, 'cost' => 0.50, 'stock_qty' => 10,
+        ]);
+
+        Livewire::actingAs($user)->test(Terminal::class)
+            ->set('barcode', 'BC-105')->call('scan')
+            ->set('paymentMethod', 'bank_transfer')
+            ->assertSet('khqrSvg', null);
+
+        Setting::set('bakong_account_id', 'shop@bank');
+        Setting::set('bakong_account_name', 'Demo Shop');
+        Setting::set('bakong_merchant_city', 'Phnom Penh');
+
+        Livewire::actingAs($user)->test(Terminal::class)
+            ->set('barcode', 'BC-105')->call('scan')
+            ->set('paymentMethod', 'bank_transfer')
+            ->assertSee('<svg', false);
     }
 }

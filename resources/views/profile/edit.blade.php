@@ -24,13 +24,8 @@
                         <h2 class="text-base font-semibold text-slate-900 dark:text-gray-100">{{ __('Language') }}</h2>
                         <p class="mt-1 text-sm text-slate-600 dark:text-gray-400">{{ __('Set the interface language.') }}</p>
 
-                        <div class="mt-5 flex items-center gap-2 rounded-xl bg-slate-50 p-1 ring-1 ring-slate-200 dark:bg-gray-800 dark:ring-gray-700">
-                            <button type="button" class="rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-900 dark:text-gray-100 shadow-sm ring-1 ring-slate-200 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700">
-                                {{ __('English') }}
-                            </button>
-                            <button type="button" class="rounded-lg px-4 py-2 text-sm text-slate-500 dark:text-gray-500" disabled>
-                                {{ __('Khmer') }}
-                            </button>
+                        <div class="mt-5">
+                            <x-language-toggle class="bg-slate-50 ring-1 ring-slate-200 dark:bg-gray-800 dark:ring-gray-700" />
                         </div>
                     </div>
                 </div>

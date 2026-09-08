@@ -31,18 +31,30 @@
                         </div>
                     </div>
 
-                    <div>
-                        <x-input-label for="category_id" :value="__('Category')" />
-                        <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:bg-gray-900 dark:text-gray-100">
-                            <option value="">{{ __('Uncategorized') }}</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>{{ $category->name }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="category_id" :value="__('Category')" />
+                            <select id="category_id" name="category_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:bg-gray-900 dark:text-gray-100">
+                                <option value="">{{ __('Uncategorized') }}</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('category_id')" />
+                        </div>
+                        <div>
+                            <x-input-label for="supplier_id" :value="__('Supplier')" />
+                            <select id="supplier_id" name="supplier_id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:bg-gray-900 dark:text-gray-100">
+                                <option value="">{{ __('None') }}</option>
+                                @foreach ($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}" @selected(old('supplier_id', $product->supplier_id) == $supplier->id)>{{ $supplier->name }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error class="mt-2" :messages="$errors->get('supplier_id')" />
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-4">
                         <div>
                             <x-input-label for="price" :value="__('Price')" />
                             <x-text-input id="price" name="price" type="number" step="0.01" min="0" class="mt-1 block w-full" :value="old('price', $product->price)" required />
@@ -52,6 +64,11 @@
                             <x-input-label for="cost" :value="__('Cost')" />
                             <x-text-input id="cost" name="cost" type="number" step="0.01" min="0" class="mt-1 block w-full" :value="old('cost', $product->cost)" />
                             <x-input-error class="mt-2" :messages="$errors->get('cost')" />
+                        </div>
+                        <div>
+                            <x-input-label for="reorder_point" :value="__('Reorder Point')" />
+                            <x-text-input id="reorder_point" name="reorder_point" type="number" min="0" class="mt-1 block w-full" :value="old('reorder_point', $product->reorder_point)" />
+                            <x-input-error class="mt-2" :messages="$errors->get('reorder_point')" />
                         </div>
                     </div>
 

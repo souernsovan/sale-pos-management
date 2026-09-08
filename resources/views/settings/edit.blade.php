@@ -74,6 +74,29 @@
                         </div>
                     </div>
 
+                    <div class="border-t border-gray-200 dark:border-gray-800 pt-6">
+                        <h4 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('Bakong / KHQR Payments') }}</h4>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Set your Individual Bakong account details to show a scannable KHQR code at checkout for Bank Transfer sales. Leave the Account ID blank to hide it.') }}</p>
+
+                        <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <x-input-label for="bakong_account_id" :value="__('Bakong Account ID')" />
+                                <x-text-input id="bakong_account_id" name="bakong_account_id" type="text" class="mt-1 block w-full" placeholder="name@bank" :value="old('bakong_account_id', $settings['bakong_account_id'])" />
+                                <x-input-error class="mt-2" :messages="$errors->get('bakong_account_id')" />
+                            </div>
+                            <div>
+                                <x-input-label for="bakong_account_name" :value="__('Account Name')" />
+                                <x-text-input id="bakong_account_name" name="bakong_account_name" type="text" class="mt-1 block w-full" :value="old('bakong_account_name', $settings['bakong_account_name'])" />
+                                <x-input-error class="mt-2" :messages="$errors->get('bakong_account_name')" />
+                            </div>
+                            <div>
+                                <x-input-label for="bakong_merchant_city" :value="__('City')" />
+                                <x-text-input id="bakong_merchant_city" name="bakong_merchant_city" type="text" class="mt-1 block w-full" :value="old('bakong_merchant_city', $settings['bakong_merchant_city'])" />
+                                <x-input-error class="mt-2" :messages="$errors->get('bakong_merchant_city')" />
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-3 gap-4">
                         <div>
                             <x-input-label for="currency_symbol" :value="__('Currency Symbol')" />
@@ -96,59 +119,6 @@
                 </form>
             </div>
 
-            @can('view users')
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">
-                <div class="flex items-center justify-between px-6 pt-6">
-                    <h3 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('User Accounts') }}</h3>
-                    @can('manage users')
-                        <x-link-button :href="route('settings.users.create')">{{ __('Add User') }}</x-link-button>
-                    @endcan
-                </div>
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800 mt-4">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Name') }}</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Email') }}</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Role') }}</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Status') }}</th>
-                            <th class="px-6 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-                        @foreach ($users as $user)
-                            <tr>
-                                <td class="px-6 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $user->name }}</td>
-                                <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $user->email }}</td>
-                                <td class="px-6 py-3 text-sm text-gray-600 dark:text-gray-400">{{ $user->getRoleNames()->first() ?? '—' }}</td>
-                                <td class="px-6 py-3 text-sm">
-                                    <span @class([
-                                        'px-2 py-1 rounded-full text-xs font-medium',
-                                        'bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400' => $user->is_active,
-                                        'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400' => ! $user->is_active,
-                                    ])>{{ $user->is_active ? __('Active') : __('Deactivated') }}</span>
-                                </td>
-                                <td class="px-6 py-3 text-right text-sm space-x-3 whitespace-nowrap">
-                                    @can('manage users')
-                                        <a href="{{ route('settings.users.edit', $user) }}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">{{ __('Edit') }}</a>
-                                        @unless ($user->is(auth()->user()))
-                                            <form method="POST" action="{{ route('settings.users.toggle-active', $user) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">{{ $user->is_active ? __('Deactivate') : __('Activate') }}</button>
-                                            </form>
-                                            <form method="POST" action="{{ route('settings.users.destroy', $user) }}" class="inline" onsubmit="return confirm('Delete this user?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">{{ __('Delete') }}</button>
-                                            </form>
-                                        @endunless
-                                    @endcan
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            @endcan
         </div>
     </div>
 </x-app-layout>

@@ -11,6 +11,8 @@
             'items' => [
                 ['permission' => 'view products', 'route' => 'products.index', 'pattern' => 'products.*', 'label' => __('Products'), 'icon' => 'products'],
                 ['permission' => 'view categories', 'route' => 'categories.index', 'pattern' => 'categories.*', 'label' => __('Categories'), 'icon' => 'categories'],
+                ['permission' => 'view suppliers', 'route' => 'suppliers.index', 'pattern' => 'suppliers.*', 'label' => __('Suppliers'), 'icon' => 'suppliers'],
+                ['permission' => 'view purchases', 'route' => 'purchases.index', 'pattern' => 'purchases.*', 'label' => __('Purchases'), 'icon' => 'purchases'],
             ],
         ],
         [
@@ -30,7 +32,9 @@
         [
             'label' => 'Administration',
             'items' => [
+                ['permission' => 'view users', 'route' => 'users.index', 'pattern' => 'users.*', 'label' => __('Users'), 'icon' => 'users'],
                 ['permission' => 'view roles', 'route' => 'roles.index', 'pattern' => 'roles.*', 'label' => __('Roles'), 'icon' => 'roles'],
+                ['permission' => 'view audit log', 'route' => 'audit.index', 'pattern' => 'audit.*', 'label' => __('Audit Log'), 'icon' => 'audit'],
                 ['permission' => 'manage settings', 'route' => 'settings.edit', 'pattern' => 'settings.*', 'label' => __('Settings'), 'icon' => 'settings'],
             ],
         ],

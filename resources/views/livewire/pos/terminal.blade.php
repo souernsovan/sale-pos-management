@@ -150,12 +150,24 @@
 
         <div>
             <x-input-label for="paymentMethod" :value="__('Payment Method')" />
-            <select id="paymentMethod" wire:model="paymentMethod" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+            <select id="paymentMethod" wire:model.live="paymentMethod" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                 <option value="cash">{{ __('Cash') }}</option>
                 <option value="bank_transfer">{{ __('Bank Transfer') }}</option>
             </select>
             @error('paymentMethod') <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
         </div>
+
+        @if ($paymentMethod === 'bank_transfer')
+            <div class="rounded-lg border border-gray-200 dark:border-gray-800 p-4 text-center" wire:loading.class="opacity-50" wire:target="discount,removeItem,incrementQuantity,decrementQuantity,updateQuantity,scan,addFromSearch">
+                @if ($this->khqrSvg)
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Scan with a Bakong-linked banking app to pay :amount', ['amount' => number_format($this->total, 2)]) }}</p>
+                    <div class="inline-block bg-white p-2 rounded">{!! $this->khqrSvg !!}</div>
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('Confirm the payment has arrived before completing the sale.') }}</p>
+                @else
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Add a Bakong Account ID in Settings to show a KHQR code here.') }}</p>
+                @endif
+            </div>
+        @endif
 
         <button
             type="button"

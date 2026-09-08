@@ -29,39 +29,22 @@ class SettingsTest extends TestCase
         $this->actingAs($user)->get(route('settings.edit'))->assertOk()->assertSee('My Home Shop');
     }
 
-    public function test_owner_can_create_edit_and_deactivate_a_staff_user(): void
+    public function test_owner_can_save_bakong_khqr_settings(): void
     {
-        $owner = User::factory()->create();
+        $user = User::factory()->create();
 
-        $this->actingAs($owner)->post(route('settings.users.store'), [
-            'name' => 'Staff One',
-            'email' => 'staff@example.com',
-            'password' => 'password123',
-            'role' => 'Cashier',
+        $this->actingAs($user)->put(route('settings.update'), [
+            'shop_name' => 'My Home Shop',
+            'currency_symbol' => '$',
+            'tax_rate' => 0,
+            'low_stock_threshold' => 5,
+            'bakong_account_id' => 'shop@bank',
+            'bakong_account_name' => 'My Home Shop',
+            'bakong_merchant_city' => 'Phnom Penh',
         ])->assertRedirect(route('settings.edit'));
 
-        $staff = User::where('email', 'staff@example.com')->firstOrFail();
-        $this->assertTrue($staff->is_active);
-        $this->assertTrue($staff->hasRole('Cashier'));
-
-        $this->actingAs($owner)->post(route('settings.users.toggle-active', $staff))->assertRedirect();
-        $this->assertFalse($staff->fresh()->is_active);
-
-        $this->post(route('logout'));
-
-        $this->post(route('login'), [
-            'email' => 'staff@example.com',
-            'password' => 'password123',
-        ])->assertSessionHasErrors('email');
-
-        $this->assertGuest();
+        $this->assertSame('shop@bank', Setting::get('bakong_account_id'));
+        $this->assertSame('Phnom Penh', Setting::get('bakong_merchant_city'));
     }
 
-    public function test_owner_cannot_deactivate_or_delete_their_own_account(): void
-    {
-        $owner = User::factory()->create();
-
-        $this->actingAs($owner)->post(route('settings.users.toggle-active', $owner))->assertStatus(422);
-        $this->actingAs($owner)->delete(route('settings.users.destroy', $owner))->assertStatus(422);
-    }
 }

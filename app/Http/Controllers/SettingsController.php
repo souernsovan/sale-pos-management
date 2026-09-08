@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
-use App\Models\User;
+use App\Support\Audit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,11 +21,12 @@ class SettingsController extends Controller
             'currency_symbol' => Setting::get('currency_symbol', '$'),
             'tax_rate' => Setting::get('tax_rate', '0'),
             'low_stock_threshold' => Setting::get('low_stock_threshold', '5'),
+            'bakong_account_id' => Setting::get('bakong_account_id'),
+            'bakong_account_name' => Setting::get('bakong_account_name'),
+            'bakong_merchant_city' => Setting::get('bakong_merchant_city', 'Phnom Penh'),
         ];
 
-        $users = User::with('roles')->orderBy('name')->get();
-
-        return view('settings.edit', compact('settings', 'users'));
+        return view('settings.edit', compact('settings'));
     }
 
     public function update(Request $request)
@@ -41,6 +42,9 @@ class SettingsController extends Controller
             'currency_symbol' => ['required', 'string', 'max:10'],
             'tax_rate' => ['required', 'numeric', 'min:0', 'max:100'],
             'low_stock_threshold' => ['required', 'integer', 'min:0'],
+            'bakong_account_id' => ['nullable', 'string', 'max:32'],
+            'bakong_account_name' => ['nullable', 'string', 'max:25'],
+            'bakong_merchant_city' => ['nullable', 'string', 'max:15'],
         ]);
 
         if ($request->hasFile('shop_logo')) {
@@ -71,8 +75,21 @@ class SettingsController extends Controller
 
         unset($data['remove_site_icon']);
 
+        $changed = [];
+
         foreach ($data as $key => $value) {
-            Setting::set($key, (string) $value);
+            $before = Setting::get($key);
+            $after = (string) $value;
+
+            if ($before !== $after) {
+                $changed[$key] = ['before' => $before, 'after' => $after];
+            }
+
+            Setting::set($key, $after);
+        }
+
+        if (! empty($changed)) {
+            Audit::log('settings', 'Updated shop settings ('.implode(', ', array_keys($changed)).')', properties: ['changes' => $changed], event: 'updated');
         }
 
         return redirect()->route('settings.edit')->with('status', 'Settings updated.');

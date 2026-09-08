@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Support\Audit;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Spatie\Permission\Models\Role;
 
@@ -40,6 +41,10 @@ class RoleController extends Controller
         $role = Role::create(['name' => $request->name]);
         $role->syncPermissions($request->input('permissions', []));
 
+        Audit::log('roles', "Created role \"{$role->name}\"", $role, [
+            'permissions' => $request->input('permissions', []),
+        ], event: 'created');
+
         return redirect()->route('roles.index')->with('status', 'Role created.');
     }
 
@@ -59,8 +64,15 @@ class RoleController extends Controller
     {
         abort_if($role->name === 'Super Admin', 422, 'Super Admin permissions cannot be edited.');
 
+        $before = ['name' => $role->name, 'permissions' => $role->permissions->pluck('name')->all()];
+
         $role->update(['name' => $request->name]);
         $role->syncPermissions($request->input('permissions', []));
+
+        Audit::log('roles', "Updated role \"{$role->name}\"", $role, [
+            'before' => $before,
+            'after' => ['name' => $role->name, 'permissions' => $request->input('permissions', [])],
+        ], event: 'updated');
 
         return redirect()->route('roles.index')->with('status', 'Role updated.');
     }
@@ -73,6 +85,10 @@ class RoleController extends Controller
 
         $role->syncPermissions($defaults);
 
+        Audit::log('roles', "Reset role \"{$role->name}\" to its default permissions", $role, [
+            'permissions' => $defaults,
+        ], event: 'updated');
+
         return redirect()->route('roles.edit', $role)->with('status', 'Role reset to its default permissions.');
     }
 
@@ -83,6 +99,8 @@ class RoleController extends Controller
         if ($role->users()->exists()) {
             return back()->withErrors(['role' => 'Cannot delete a role that still has users assigned.']);
         }
+
+        Audit::log('roles', "Deleted role \"{$role->name}\"", $role, event: 'deleted');
 
         $role->delete();
 

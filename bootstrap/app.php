@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // front of the app, so trust it — otherwise the app thinks every
         // request is plain HTTP and generates http:// URLs/redirects.
         $middleware->trustProxies(at: '*');
+
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

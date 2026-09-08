@@ -25,8 +25,9 @@ class DashboardController extends Controller
         $topProducts = SaleItem::bestSellers(limit: 5);
 
         $lowStockThreshold = (int) Setting::get('low_stock_threshold', '5');
+        $lowStockCount = Product::query()->lowStock($lowStockThreshold)->count();
         $lowStockProducts = Product::query()
-            ->where('stock_qty', '<=', $lowStockThreshold)
+            ->lowStock($lowStockThreshold)
             ->orderBy('stock_qty')
             ->limit(10)
             ->get();
@@ -36,7 +37,7 @@ class DashboardController extends Controller
         $topProductsScale = $this->niceScale((float) $topProducts->max('total_qty'));
 
         return view('dashboard', compact(
-            'todaySales', 'monthSales', 'topProducts', 'lowStockProducts', 'lowStockThreshold',
+            'todaySales', 'monthSales', 'topProducts', 'lowStockProducts', 'lowStockThreshold', 'lowStockCount',
             'salesTrend', 'salesTrendScale', 'topProductsScale'
         ));
     }

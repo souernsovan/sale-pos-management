@@ -35,6 +35,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit' => 'edit categories',
             'delete' => 'delete categories',
         ],
+        'Suppliers' => [
+            'view' => 'view suppliers',
+            'create' => 'create suppliers',
+            'edit' => 'edit suppliers',
+            'delete' => 'delete suppliers',
+        ],
+        'Purchases' => [
+            'view' => 'view purchases',
+            'create' => 'create purchases',
+        ],
         'POS' => [
             'manage' => 'access pos', // use the terminal and complete sales
         ],
@@ -64,6 +74,9 @@ class RolesAndPermissionsSeeder extends Seeder
         'Roles' => [
             'view' => 'view roles',
             'manage' => 'manage roles',
+        ],
+        'Audit Log' => [
+            'view' => 'view audit log',
         ],
     ];
 

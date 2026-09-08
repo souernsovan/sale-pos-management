@@ -44,6 +44,7 @@
                         </div>
 
                         <div class="flex shrink-0 items-center gap-2">
+                            <x-language-toggle />
                             <x-theme-toggle />
 
                             <x-dropdown align="right" width="64" contentClasses="p-2 bg-white dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">

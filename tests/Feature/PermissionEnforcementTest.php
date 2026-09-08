@@ -47,6 +47,7 @@ class PermissionEnforcementTest extends TestCase
         $this->actingAs($cashier)->get(route('reports.index'))->assertForbidden();
         $this->actingAs($cashier)->get(route('categories.index'))->assertForbidden();
         $this->actingAs($cashier)->get(route('roles.index'))->assertForbidden();
+        $this->actingAs($cashier)->get(route('users.index'))->assertForbidden();
     }
 
     public function test_cashier_can_view_but_not_manage_products(): void
@@ -70,5 +71,27 @@ class PermissionEnforcementTest extends TestCase
         $viewer->syncRoles([]); // no permissions at all
 
         Livewire::actingAs($viewer)->test(Terminal::class)->assertStatus(403);
+    }
+
+    public function test_cashier_is_blocked_from_suppliers_and_purchases(): void
+    {
+        $cashier = $this->cashier();
+
+        $this->actingAs($cashier)->get(route('suppliers.index'))->assertForbidden();
+        $this->actingAs($cashier)->get(route('suppliers.create'))->assertForbidden();
+        $this->actingAs($cashier)->get(route('purchases.index'))->assertForbidden();
+        $this->actingAs($cashier)->get(route('purchases.create'))->assertForbidden();
+    }
+
+    public function test_cashier_does_not_see_cost_price_on_a_product_page(): void
+    {
+        $cashier = $this->cashier();
+        $product = Product::create([
+            'name' => 'Secret Sauce', 'sku' => 'SKU-502', 'price' => 5.00, 'cost' => 2.00, 'stock_qty' => 5,
+        ]);
+
+        $this->actingAs($cashier)->get(route('products.show', $product))
+            ->assertOk()
+            ->assertDontSee('2.00');
     }
 }

@@ -16,7 +16,9 @@ class StockMovementController extends Controller
         $data = $request->validate([
             'type' => ['required', 'in:restock,adjustment,damage'],
             'quantity' => ['required', 'integer', 'min:1'],
-            'note' => ['nullable', 'string', 'max:255'],
+            'note' => [$request->input('type') === 'restock' ? 'nullable' : 'required', 'string', 'max:255'],
+        ], [
+            'note.required' => 'A reason is required for an adjustment or damage/loss entry.',
         ]);
 
         $signedQuantity = $data['type'] === 'restock' ? $data['quantity'] : -$data['quantity'];
