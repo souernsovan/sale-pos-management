@@ -4,6 +4,7 @@ use App\Http\Controllers\AuditController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeployController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,14 @@ Route::get('/', function () {
 });
 
 Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
+
+// Browser-triggerable equivalents of `php artisan config:cache` etc., for
+// hosts with no terminal access. Gated by ?token=... (DEPLOY_TOKEN in .env).
+Route::get('/deploy/optimize', [DeployController::class, 'optimize'])->name('deploy.optimize');
+Route::get('/deploy/clear', [DeployController::class, 'clear'])->name('deploy.clear');
+
+// Fallback file serving for UPLOADS_DISK=public_direct — see App\Support\Uploads::url().
+Route::get('/file/{path}', [UploadController::class, 'show'])->where('path', '.*')->name('uploads.show');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])

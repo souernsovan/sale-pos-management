@@ -51,6 +51,20 @@ return [
             'report' => false,
         ],
 
+        // Same public URL convention as the 'public' disk above, but writes
+        // straight into public/storage instead of storage/app/public — no
+        // `php artisan storage:link` symlink required. For shared hosts with
+        // no terminal access and/or symlink() disabled (e.g. InfinityFree):
+        // set UPLOADS_DISK=public_direct in .env to use this instead.
+        'public_direct' => [
+            'driver' => 'local',
+            'root' => public_path('storage'),
+            'url' => '/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -80,5 +94,19 @@ return [
     'links' => [
         public_path('storage') => storage_path('app/public'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Uploads Disk
+    |--------------------------------------------------------------------------
+    |
+    | Which disk (from above) product images, the shop logo, the site icon,
+    | and profile photos are stored on. Defaults to "public" (requires
+    | `php artisan storage:link`). Set UPLOADS_DISK=public_direct in .env on
+    | hosts where that command can't be run and/or symlink() is disabled.
+    |
+    */
+
+    'uploads_disk' => env('UPLOADS_DISK', 'public'),
 
 ];

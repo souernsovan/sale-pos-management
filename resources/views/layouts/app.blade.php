@@ -8,14 +8,14 @@
         <title>{{ \App\Models\Setting::get('site_title', config('app.name', 'Laravel')) }}</title>
         <meta name="description" content="{{ \App\Models\Setting::get('site_description', 'Point of sale management system') }}">
         @if ($siteIcon = \App\Models\Setting::get('site_icon'))
-            <link rel="icon" href="{{ '/storage/'.ltrim($siteIcon, '/') }}">
+            <link rel="icon" href="{{ App\Support\Uploads::url($siteIcon) }}">
         @endif
 
         @include('partials.theme-boot-script')
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600|noto-sans-khmer:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -44,7 +44,6 @@
                         </div>
 
                         <div class="flex shrink-0 items-center gap-2">
-                            <x-language-toggle />
                             <x-theme-toggle />
 
                             <x-dropdown align="right" width="64" contentClasses="p-2 bg-white dark:bg-gray-900 dark:ring-1 dark:ring-gray-800">

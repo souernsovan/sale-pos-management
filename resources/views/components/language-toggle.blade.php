@@ -1,5 +1,9 @@
 @php
-    $locales = ['en' => 'EN', 'km' => 'ខ្មែរ'];
+    // Latin abbreviations, not native script — Khmer glyphs are taller and
+    // denser than Latin letters, so "ខ្មែរ" next to "EN" in a small pill
+    // always looks visually unbalanced (and depends on a Khmer font being
+    // loaded). "KM" matches "EN"'s width/weight and needs no special font.
+    $locales = ['en' => 'EN', 'km' => 'KM'];
     $current = app()->getLocale();
 @endphp
 

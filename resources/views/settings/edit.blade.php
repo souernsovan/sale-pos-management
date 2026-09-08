@@ -33,7 +33,7 @@
                     <div>
                         <x-input-label for="shop_logo" :value="__('Logo')" />
                         @if ($settings['shop_logo'])
-                            <img src="{{ Illuminate\Support\Facades\Storage::disk('public')->url($settings['shop_logo']) }}" class="h-12 mt-2 mb-2">
+                            <img src="{{ App\Support\Uploads::url($settings['shop_logo']) }}" class="h-12 mt-2 mb-2">
                         @endif
                         <input id="shop_logo" name="shop_logo" type="file" accept="image/*" class="mt-1 block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-500/10 dark:file:text-indigo-400 dark:hover:file:bg-indigo-500/20" />
                         <x-input-error class="mt-2" :messages="$errors->get('shop_logo')" />
@@ -59,7 +59,7 @@
                             <div>
                                 <x-input-label for="site_icon" :value="__('Browser Icon / Favicon')" />
                                 @if ($settings['site_icon'])
-                                    <img src="{{ '/storage/'.ltrim($settings['site_icon'], '/') }}" alt="{{ __('Current browser icon') }}" class="mt-2 h-10 w-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-800">
+                                    <img src="{{ App\Support\Uploads::url($settings['site_icon']) }}" alt="{{ __('Current browser icon') }}" class="mt-2 h-10 w-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-800">
                                 @endif
                                 <input id="site_icon" name="site_icon" type="file" accept=".png,.jpg,.jpeg,.webp,.ico,image/png,image/jpeg,image/webp,image/x-icon" class="mt-2 block w-full text-sm text-gray-600 dark:text-gray-400 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-indigo-500/10 dark:file:text-indigo-400 dark:hover:file:bg-indigo-500/20" />
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('PNG, JPG, WebP, or ICO. Maximum 512 KB.') }}</p>

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\StockMovement;
+use App\Support\Telegram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -27,6 +29,9 @@ class StockMovementController extends Controller
             return back()->withErrors(['quantity' => 'Quantity exceeds current stock on hand.']);
         }
 
+        $lowStockThreshold = (int) Setting::get('low_stock_threshold', '5');
+        $wasLowStock = $product->isLowStock($lowStockThreshold);
+
         DB::transaction(function () use ($product, $data, $signedQuantity) {
             $product->increment('stock_qty', $signedQuantity);
             $product->stockMovements()->create([
@@ -36,6 +41,10 @@ class StockMovementController extends Controller
                 'created_by' => auth()->id(),
             ]);
         });
+
+        if (! $wasLowStock && $product->isLowStock($lowStockThreshold)) {
+            Telegram::lowStock($product);
+        }
 
         return back()->with('status', 'Stock updated.');
     }

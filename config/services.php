@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+    ],
+
+    // Read via config(), not env(), in app code: Laravel skips re-parsing
+    // .env on every request once config:cache has run, so a raw env() call
+    // in a controller would go null after the very first /deploy/optimize.
+    'deploy_token' => env('DEPLOY_TOKEN'),
+
 ];

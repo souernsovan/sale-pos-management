@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Support\Audit;
+use App\Support\Uploads;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -50,9 +50,9 @@ class SettingsController extends Controller
         if ($request->hasFile('shop_logo')) {
             $oldLogo = Setting::get('shop_logo');
             if ($oldLogo) {
-                Storage::disk('public')->delete($oldLogo);
+                Uploads::disk()->delete($oldLogo);
             }
-            $data['shop_logo'] = $request->file('shop_logo')->store('settings', 'public');
+            $data['shop_logo'] = $request->file('shop_logo')->store('settings', config('filesystems.uploads_disk', 'public'));
         } else {
             unset($data['shop_logo']);
         }
@@ -60,13 +60,13 @@ class SettingsController extends Controller
         if ($request->hasFile('site_icon')) {
             $oldIcon = Setting::get('site_icon');
             if ($oldIcon) {
-                Storage::disk('public')->delete($oldIcon);
+                Uploads::disk()->delete($oldIcon);
             }
-            $data['site_icon'] = $request->file('site_icon')->store('settings', 'public');
+            $data['site_icon'] = $request->file('site_icon')->store('settings', config('filesystems.uploads_disk', 'public'));
         } elseif ($request->boolean('remove_site_icon')) {
             $oldIcon = Setting::get('site_icon');
             if ($oldIcon) {
-                Storage::disk('public')->delete($oldIcon);
+                Uploads::disk()->delete($oldIcon);
             }
             $data['site_icon'] = null;
         } else {

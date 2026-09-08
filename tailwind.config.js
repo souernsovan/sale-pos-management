@@ -14,7 +14,11 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                // 'Noto Sans Khmer' after Figtree: Figtree has no Khmer
+                // glyphs at all, so without it the browser falls back to
+                // whatever Khmer font (if any) the OS happens to have,
+                // which looks inconsistent or shows as tofu boxes.
+                sans: ['Figtree', 'Noto Sans Khmer', ...defaultTheme.fontFamily.sans],
             },
         },
     },

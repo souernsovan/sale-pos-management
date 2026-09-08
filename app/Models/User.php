@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\Uploads;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,8 +60,6 @@ class User extends Authenticatable
 
     public function profilePhotoUrl(): ?string
     {
-        return $this->profile_photo
-            ? '/storage/'.ltrim($this->profile_photo, '/')
-            : null;
+        return Uploads::url($this->profile_photo);
     }
 }

@@ -10,9 +10,9 @@ use App\Models\Setting;
 use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Support\Audit;
+use App\Support\Uploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -55,7 +55,7 @@ class ProductController extends Controller
         $data = $request->validated();
 
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = $request->file('image')->store('products', config('filesystems.uploads_disk', 'public'));
         }
 
         $initialStock = (int) ($data['stock_qty'] ?? 0);
@@ -117,9 +117,9 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+                Uploads::disk()->delete($product->image);
             }
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $data['image'] = $request->file('image')->store('products', config('filesystems.uploads_disk', 'public'));
         }
 
         $product->update($data);
@@ -134,7 +134,7 @@ class ProductController extends Controller
         Audit::log('products', "Deleted product \"{$product->name}\" (SKU {$product->sku})", $product, event: 'deleted');
 
         if ($product->image) {
-            Storage::disk('public')->delete($product->image);
+            Uploads::disk()->delete($product->image);
         }
 
         $product->delete();

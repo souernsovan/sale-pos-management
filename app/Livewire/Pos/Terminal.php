@@ -8,6 +8,7 @@ use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\StockMovement;
 use App\Services\Khqr\KhqrCode;
+use App\Support\Telegram;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -218,7 +219,10 @@ class Terminal extends Component
             'discount' => ['numeric', 'min:0'],
         ]);
 
-        $sale = DB::transaction(function () {
+        $lowStockThreshold = (int) Setting::get('low_stock_threshold', '5');
+        $newlyLowStock = [];
+
+        $sale = DB::transaction(function () use ($lowStockThreshold, &$newlyLowStock) {
             $products = Product::whereIn('id', array_column($this->cart, 'product_id'))
                 ->lockForUpdate()
                 ->get()
@@ -249,6 +253,7 @@ class Terminal extends Component
 
             foreach ($this->cart as $line) {
                 $product = $products[$line['product_id']];
+                $wasLowStock = $product->isLowStock($lowStockThreshold);
 
                 $sale->items()->create([
                     'product_id' => $product->id,
@@ -265,10 +270,21 @@ class Terminal extends Component
                     'note' => "Sale #{$sale->id}",
                     'created_by' => auth()->id(),
                 ]);
+
+                if (! $wasLowStock && $product->isLowStock($lowStockThreshold)) {
+                    $newlyLowStock[] = $product;
+                }
             }
 
             return $sale;
         });
+
+        // Sent after the transaction commits — an external HTTP call has no
+        // place holding row locks open, and a rolled-back sale shouldn't notify.
+        Telegram::saleCompleted($sale);
+        foreach ($newlyLowStock as $product) {
+            Telegram::lowStock($product);
+        }
 
         $this->cart = [];
         $this->discount = 0;

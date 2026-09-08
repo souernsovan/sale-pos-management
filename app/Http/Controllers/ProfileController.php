@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -32,12 +32,12 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_photo')) {
             if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
+                Uploads::disk()->delete($user->profile_photo);
             }
 
-            $data['profile_photo'] = $request->file('profile_photo')->store('profile-photos', 'public');
+            $data['profile_photo'] = $request->file('profile_photo')->store('profile-photos', config('filesystems.uploads_disk', 'public'));
         } elseif ($request->boolean('remove_profile_photo') && $user->profile_photo) {
-            Storage::disk('public')->delete($user->profile_photo);
+            Uploads::disk()->delete($user->profile_photo);
             $data['profile_photo'] = null;
         }
 

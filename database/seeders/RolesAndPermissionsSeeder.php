@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
@@ -127,9 +128,19 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     public function run(): void
     {
+        // DatabaseSeeder uses Laravel's WithoutModelEvents trait, which
+        // disables all Eloquent model events — including the `saved` event
+        // spatie/laravel-permission relies on to auto-invalidate its
+        // permission cache after each Permission::findOrCreate() below.
+        // With events suppressed, that cache never learns about newly
+        // created permissions, so syncPermissions() further down would
+        // fail claiming they "don't exist" even though they're in the DB.
+        // Bust it manually once, after creating them all.
         foreach (self::allPermissions() as $permission) {
             Permission::findOrCreate($permission);
         }
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         foreach (self::BUILT_IN_ROLES as $roleName) {
             $role = Role::findOrCreate($roleName);
